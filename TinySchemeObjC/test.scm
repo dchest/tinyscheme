@@ -13,6 +13,9 @@
 (define (class-name object)
   (objc-send object "className"))
 
+(define (self object)
+  (objc-send object "self"))
+
 (define (bool x)
   (if (eqv? x 0) #f #t))
 
