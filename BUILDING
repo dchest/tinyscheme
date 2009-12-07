@@ -69,7 +69,11 @@ general compiles out of the box.
 	 but you do care about faster execution.
 
 
-     OS-X tip
+     OS-X tip 
+     (!!! 
+		NOT NEEDED if you got this from http://github/dchest/tinyscheme/
+        Just type 'make' and that's it
+     )
      --------
 	 I don't have access to OS-X, but Brian Maher submitted the following tip:
 
