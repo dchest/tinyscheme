@@ -3,8 +3,10 @@
 
 (begin
   (log "Hello")
-  
-  (objc-send (new "Test") "displayObject:" 
-                          "Hello from Test class instance!")
+
+  (let ((test (new "Test")))
+    (objc-send test "displayObject:" "Hello from Test class instance!")
+    (objc-send test "displayObject:" "...and hello again"))
+    
   (log "Goodbye")
 )

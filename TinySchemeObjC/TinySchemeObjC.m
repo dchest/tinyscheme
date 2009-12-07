@@ -1,7 +1,9 @@
 #import <Foundation/Foundation.h>
 #import "TinyScheme.h"
 
-@interface Test : NSObject
+@interface Test : NSObject {
+  int cnt;
+}
 - (void)displayObject:(id)s;
 @end
 
@@ -9,7 +11,7 @@
 
 - (void)displayObject:(id)s
 {
-  NSLog(@"Test says: %@", s);
+  NSLog(@"Test says [%d]: %@", cnt++, s);
 }
 
 @end
