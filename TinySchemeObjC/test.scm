@@ -2,9 +2,9 @@
         (objc-send (objc-send (objc-class class-name) "alloc") "init"))
 
 (begin
-  (display "Hello")
+  (log "Hello")
   
   (objc-send (new "Test") "displayObject:" 
                           "Hello from Test class instance!")
-  (display "Goodbye")
+  (log "Goodbye")
 )

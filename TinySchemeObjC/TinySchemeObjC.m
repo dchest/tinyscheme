@@ -9,7 +9,7 @@
 
 - (void)displayObject:(id)s
 {
-  NSLog(@"%@", s);
+  NSLog(@"Test says: %@", s);
 }
 
 @end

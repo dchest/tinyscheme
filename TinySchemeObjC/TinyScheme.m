@@ -19,8 +19,8 @@
 
 NSString *TinySchemeException = @"TinySchemeException";
 
-pointer ts_objc_send(scheme *sc, pointer args) {
-  
+pointer ts_objc_send(scheme *sc, pointer args) 
+{
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   NSString *objc_id = NULL, *objc_sel = NULL; 
 
@@ -79,7 +79,7 @@ pointer ts_objc_class(scheme *sc, pointer args)
   return sc->vptr->mk_symbol(sc, symbol);
 }
 
-pointer ts_display(scheme *sc, pointer args)
+pointer ts_log(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   NSMutableString *str = [[[NSMutableString alloc] init] autorelease];
@@ -115,8 +115,8 @@ pointer ts_display(scheme *sc, pointer args)
   sc_->vptr->scheme_define( 
        sc_, 
        sc_->global_env, 
-       sc_->vptr->mk_symbol(sc_, "display"),
-       sc_->vptr->mk_foreign_func(sc_, ts_display)); 
+       sc_->vptr->mk_symbol(sc_, "log"),
+       sc_->vptr->mk_foreign_func(sc_, ts_log)); 
   return self;
 }
 
