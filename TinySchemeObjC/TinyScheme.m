@@ -12,6 +12,7 @@
 @property(retain) NSMutableDictionary *registeredObjects;
 - (pointer)objCTypeToSchemeType:(id)obj;
 - (id)schemeTypeToObjCType:(pointer)ptr;
+- (void)registerClass:(id)object withName:(NSString *)name;
 @end
 
 #define SCI sc->vptr
@@ -100,7 +101,7 @@ pointer ts_objc_class(scheme *sc, pointer args)
   // get symbol
   char *symbol = sc->vptr->string_value(sc->vptr->pair_car(args));
   NSString *symString = [NSString stringWithUTF8String:symbol];
-  [ts registerObject:NSClassFromString(symString) withName:symString];
+  [ts registerClass:NSClassFromString(symString) withName:symString];
   return sc->vptr->mk_symbol(sc, symbol);
 }
 
@@ -176,9 +177,15 @@ pointer ts_log(scheme *sc, pointer args)
   scheme_load_string(sc_, [string UTF8String]);
 }
 
-- (void)registerObject:(id)object withName:(NSString *)name
+// Private method similar to registerObject, but preserves case
+- (void)registerClass:(id)object withName:(NSString *)name 
 {
   [registeredObjects_ setObject:object forKey:name];
+}
+
+- (void)registerObject:(id)object withName:(NSString *)name
+{
+  [registeredObjects_ setObject:object forKey:[name lowercaseString]];
 }
 
 - (pointer)objCTypeToSchemeType:(id)obj
@@ -237,7 +244,7 @@ pointer ts_log(scheme *sc, pointer args)
   else if (ptr == sc_->NIL)
     return [NSNull null];
   else
-    [NSException raise:TinySchemeException format:@"Unknown scheme type of value"];
+    [NSException raise:TinySchemeException format:@"Unknown scheme type"];
 }
 
 @end

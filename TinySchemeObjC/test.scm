@@ -21,7 +21,7 @@
 
 (define (eqvobj? obj1 obj2)
   (bool (objc-send obj1 "isEqual:" obj2)))
-
+  
 ;
 ; Demo
 ;
@@ -39,5 +39,6 @@
       (log "One == Two ?!")
       (log "One != Two")))
     
-  (log "Goodbye")
+  (log "Goodbye... BTW, magic number is" 'magicNumber "of class" 
+    (class-name 'magicNumber))
 )

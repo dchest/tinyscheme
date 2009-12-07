@@ -31,8 +31,9 @@ int main (int argc, const char * argv[])
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"])
     NSLog(@"cannot load init.scm");
 
-  //Test *test = [[Test alloc] init];
-  //[ts registerObject:test withName:@"test"];
+  // Expose some objects to scheme
+  NSNumber *magicNumber = [NSNumber numberWithInt:42];
+  [ts registerObject:magicNumber withName:@"magicNumber"];
   
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");
