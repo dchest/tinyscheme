@@ -118,6 +118,12 @@ pointer ts_log(scheme *sc, pointer args)
   return sc->NIL;
 }
 
+pointer ts_error(scheme *sc, pointer args) 
+{
+  [NSException raise:TinySchemeException format:@"Scheme error: %s", 
+    sc->vptr->string_value(sc->vptr->pair_car(args))];
+}
+
 @implementation TinyScheme
 @synthesize registeredObjects=registeredObjects_;
 
@@ -143,6 +149,11 @@ pointer ts_log(scheme *sc, pointer args)
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "log"),
        sc_->vptr->mk_foreign_func(sc_, ts_log)); 
+  sc_->vptr->scheme_define( 
+       sc_, 
+       sc_->global_env, 
+       sc_->vptr->mk_symbol(sc_, "error"),
+       sc_->vptr->mk_foreign_func(sc_, ts_error)); 
   return self;
 }
 
