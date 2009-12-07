@@ -22,13 +22,13 @@ int main (int argc, const char * argv[])
   TinyScheme *ts = [[TinyScheme alloc] init];
   [ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"];
 
-  Test *test = [[Test alloc] init];
-  [ts registerObject:test withName:@"test"];
+  //Test *test = [[Test alloc] init];
+  //[ts registerObject:test withName:@"test"];
   
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");
 
-  [test release];
+  //[test release];
   [ts release];
   [pool drain];
   return 0;
