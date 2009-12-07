@@ -38,7 +38,14 @@ int main (int argc, const char * argv[])
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");
 
-  //[test release];
+  @try {
+    [ts loadString:@"(some (scheme code) with errors))"];
+  }
+  @catch (NSException *e) {
+    NSLog(@"(Successfuly cought code with errors. This is intentional! "
+           "The exception was: %@ reason: ``%@'')", [e name], [e reason]);
+  }
+
   [ts release];
   [pool drain];
   return 0;
