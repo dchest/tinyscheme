@@ -1,16 +1,35 @@
 #import <Foundation/Foundation.h>
 #import "TinyScheme.h"
 
+@interface Test : NSObject
+- (void)displayObject:(id)s;
+@end
+
+@implementation Test
+
+- (void)displayObject:(id)s
+{
+  NSLog(@"%@", s);
+}
+
+@end
+
+
 int main (int argc, const char * argv[]) 
 {
   NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
-  TinyScheme *tc = [[TinyScheme alloc] init];
-  [tc loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"];
-  
-  [tc loadString:@"(display \"this is test\")"];
-  [tc test];
+  TinyScheme *ts = [[TinyScheme alloc] init];
+  [ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"];
 
+  Test *test = [[Test alloc] init];
+  [ts registerObject:test withName:@"test"];
+  
+  if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
+    NSLog(@"cannot load test.scm");
+
+  [test release];
+  [ts release];
   [pool drain];
   return 0;
 }

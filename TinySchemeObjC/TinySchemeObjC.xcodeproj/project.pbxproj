@@ -35,6 +35,7 @@
 		0AD5DEC810CD4CB3003A4051 /* scheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scheme.h; path = ../scheme.h; sourceTree = SOURCE_ROOT; };
 		0AD5DECB10CD4CC2003A4051 /* TinyScheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TinyScheme.h; sourceTree = "<group>"; };
 		0AD5DECC10CD4CC2003A4051 /* TinyScheme.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TinyScheme.m; sourceTree = "<group>"; };
+		0AD5DFDF10CD7325003A4051 /* test.scm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.scm; sourceTree = "<group>"; };
 		32A70AAB03705E1F00C91783 /* TinySchemeObjC_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TinySchemeObjC_Prefix.pch; sourceTree = "<group>"; };
 		8DD76FA10486AA7600D96B5E /* TinySchemeObjC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TinySchemeObjC; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859EA3029092ED04C91782 /* TinySchemeObjC.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = TinySchemeObjC.1; sourceTree = "<group>"; };
@@ -67,6 +68,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				0AD5DFDF10CD7325003A4051 /* test.scm */,
 				0AD5DECB10CD4CC2003A4051 /* TinyScheme.h */,
 				0AD5DECC10CD4CC2003A4051 /* TinyScheme.m */,
 				0AD5DEC810CD4CB3003A4051 /* scheme.h */,

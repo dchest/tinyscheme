@@ -37,8 +37,31 @@ pointer ts_objc_send(scheme *sc, pointer args) {
   if (IsNull(selName))
     [NSException raise:TinySchemeException format:@"No selector in arguments"];
   
-  id result = [object performSelector:NSSelectorFromString(selName)];
-  return [ts objCTypeToSchemeType:result];
+  
+  SEL selector = NSSelectorFromString(selName);
+  
+  NSMethodSignature *sig = nil;
+  sig = [[object class] instanceMethodSignatureForSelector:selector];
+
+  NSInvocation *inv = [NSInvocation invocationWithMethodSignature:sig];
+  [inv setTarget:object];
+  [inv setSelector:selector];
+  
+  pointer curarg = sc->vptr->pair_cdr(args);
+  for (int i = 2; i < [sig numberOfArguments]; i++) {
+    curarg = sc->vptr->pair_cdr(curarg);
+    id arg = [ts schemeTypeToObjCType:sc->vptr->pair_car(curarg)];
+    [inv setArgument:&arg atIndex:i];
+  }
+  [inv retainArguments];
+  [inv invoke];
+    
+  if (strcmp([sig methodReturnType], @encode(void)) != 0) { // not void
+    id result = nil;
+    [inv getReturnValue:&result];
+    return [ts objCTypeToSchemeType:result];
+  }
+  return sc->NIL;
 }
 
 @implementation TinyScheme
@@ -149,18 +172,6 @@ pointer ts_objc_send(scheme *sc, pointer args) {
     return [NSNull null];
   else
     [NSException raise:TinySchemeException format:@"Unknown scheme type of value"];
-}
-
-- (id)testWorks
-{
-  NSLog(@"Test works!");
-  return self;
-}
-
-- (void)test
-{
-  [self registerObject:self withName:@"self"];
-  [self loadString:@"(objc-send (objc-send 'self \"testWorks\") \"testWorks\")"];
 }
 
 @end

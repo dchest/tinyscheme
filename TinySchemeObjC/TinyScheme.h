@@ -14,13 +14,11 @@
 
 @interface TinyScheme : NSObject {
   scheme *sc_;
-//  NSMutableDictionary *registeredObjects_;
+  NSMutableDictionary *registeredObjects_;
 }
 - (BOOL)loadFileWithURL:(NSURL *)url;
 - (BOOL)loadFileWithPath:(NSString *)path;
 - (void)loadString:(NSString *)string;
 - (void)registerObject:(id)object withName:(NSString *)name;
-
-- (void)test;
 
 @end
