@@ -25,7 +25,7 @@
 
 int main (int argc, const char * argv[]) 
 {
-  NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
   TinyScheme *ts = [[TinyScheme alloc] init];
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"])
