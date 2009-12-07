@@ -8,6 +8,12 @@
 // --------
 // $ cc example.c -L./ -ltinyscheme -o example
 //
+// Note: if you want to statically, link, first compile tinyscheme as NOT standalone.
+// To do this, change scheme.h: # define STANDALONE 0   (instead of 1)
+// Then 'make'. Forget about errors. Remove libtinyscheme.so (leave only static library .a)
+// And then compile this example as written above.
+// 
+//
 // Run
 // ---
 // $ ./example
