@@ -16,6 +16,9 @@
 (define (self object)
   (objc-send object "self"))
 
+(define (description object)
+  (objc-send object "description"))
+
 (define (ctrue? x)
   (if (zero? x) #f #t))
 
@@ -46,4 +49,13 @@
     
   (log "Goodbye... BTW, magic number is" 'magicNumber "of class" 
     (class-name 'magicNumber))
+  
+  ;
+  ; 'current-objc-interface points to instance of TinyScheme ObjC class
+  ; which runs us. Let me show how to manupilate it:
+  ;
+  (log "\n---\n"
+       "Listing registered objects:\n"
+      (description (objc-send 'current-objc-interface "registeredObjectsCopy"))
+       "\n---")
 )

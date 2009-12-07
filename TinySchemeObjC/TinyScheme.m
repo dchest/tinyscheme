@@ -108,6 +108,8 @@ pointer ts_objc_class(scheme *sc, pointer args)
 pointer ts_log(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  if (args == sc->NIL)
+    [NSException raise:TinySchemeException format:@"No arguments to log"];
   NSMutableString *str = [[[NSMutableString alloc] init] autorelease];
   pointer curarg = args;
   do {
@@ -153,7 +155,8 @@ pointer ts_error(scheme *sc, pointer args)
        sc_, 
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "error"),
-       sc_->vptr->mk_foreign_func(sc_, ts_error)); 
+       sc_->vptr->mk_foreign_func(sc_, ts_error));
+  [self registerObject:self withName:@"current-objc-interface"];
   return self;
 }
 
@@ -197,6 +200,11 @@ pointer ts_error(scheme *sc, pointer args)
 - (void)registerObject:(id)object withName:(NSString *)name
 {
   [registeredObjects_ setObject:object forKey:[name lowercaseString]];
+}
+
+- (NSDictionary *)registeredObjectsCopy
+{
+  return [registeredObjects_ copy];
 }
 
 - (pointer)objCTypeToSchemeType:(id)obj

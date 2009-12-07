@@ -21,4 +21,7 @@
 - (void)loadString:(NSString *)string;
 - (void)registerObject:(id)object withName:(NSString *)name;
 
+// Use this instead of registeredObjects to inspect registered objects in Scheme
+@property(readonly) NSDictionary *registeredObjectsCopy;
+
 @end
