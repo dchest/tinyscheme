@@ -16,14 +16,14 @@
 (define (self object)
   (objc-send object "self"))
 
-(define (bool x)
+(define (ctrue? x)
   (if (zero? x) #f #t))
 
 (macro (if-bool form)
-  `(if (bool ,(cadr form)) ,@(cddr form)))
+  `(if (ctrue? ,(cadr form)) ,@(cddr form)))
 
 (define (eqvobj? obj1 obj2)
-  (bool (objc-send obj1 "isEqual:" obj2)))
+  (ctrue? (objc-send obj1 "isEqual:" obj2)))
   
 ;
 ; Demo
