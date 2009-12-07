@@ -40,8 +40,8 @@ pointer ts_objc_send(scheme *sc, pointer args) {
   
   SEL selector = NSSelectorFromString(selName);
   
-  NSMethodSignature *sig = nil;
-  sig = [[object class] instanceMethodSignatureForSelector:selector];
+  NSMethodSignature *sig = 
+    [object methodSignatureForSelector:selector];
 
   NSInvocation *inv = [NSInvocation invocationWithMethodSignature:sig];
   [inv setTarget:object];
@@ -64,6 +64,34 @@ pointer ts_objc_send(scheme *sc, pointer args) {
   return sc->NIL;
 }
 
+pointer ts_objc_class(scheme *sc, pointer args)
+{
+  TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  if (args == sc->NIL)
+    [NSException raise:TinySchemeException format:@"No arguments to objc-class"];
+  if (!sc->vptr->is_string(sc->vptr->pair_car(args)))
+    [NSException raise:TinySchemeException format:
+      @"Argument to objc-class is not string"];
+  // get symbol
+  char *symbol = sc->vptr->string_value(sc->vptr->pair_car(args));
+  NSString *symString = [NSString stringWithUTF8String:symbol];
+  [ts registerObject:NSClassFromString(symString) withName:symString];
+  return sc->vptr->mk_symbol(sc, symbol);
+}
+
+pointer ts_display(scheme *sc, pointer args)
+{
+  TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  NSMutableString *str = [[[NSMutableString alloc] init] autorelease];
+  pointer curarg = args;
+  do {
+    id arg = [ts schemeTypeToObjCType:sc->vptr->pair_car(curarg)];
+    [str appendFormat:@"%@ ", arg];
+  } while ((curarg = sc->vptr->pair_cdr(curarg)) != sc->NIL);
+  NSLog(@"%@", str);
+  return sc->NIL;
+}
+
 @implementation TinyScheme
 @synthesize registeredObjects=registeredObjects_;
 
@@ -79,6 +107,16 @@ pointer ts_objc_send(scheme *sc, pointer args) {
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "objc-send"),
        sc_->vptr->mk_foreign_func(sc_, ts_objc_send)); 
+  sc_->vptr->scheme_define( 
+       sc_, 
+       sc_->global_env, 
+       sc_->vptr->mk_symbol(sc_, "objc-class"),
+       sc_->vptr->mk_foreign_func(sc_, ts_objc_class)); 
+  sc_->vptr->scheme_define( 
+       sc_, 
+       sc_->global_env, 
+       sc_->vptr->mk_symbol(sc_, "display"),
+       sc_->vptr->mk_foreign_func(sc_, ts_display)); 
   return self;
 }
 
