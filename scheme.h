@@ -4,6 +4,7 @@
 #define _SCHEME_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
  * Default values for #define'd symbols
@@ -15,7 +16,7 @@
 #ifndef _MSC_VER 
 # define USE_STRCASECMP 1 
 # ifndef USE_STRLWR
-#   define USE_STRLWR 1 
+#   define USE_STRLWR 1
 # endif
 # define SCHEME_EXPORT
 #else 

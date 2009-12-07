@@ -12,6 +12,7 @@
  *
  */
 
+
 #define _SCHEME_SOURCE
 #include "scheme-private.h"
 #ifndef WIN32
