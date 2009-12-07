@@ -17,7 +17,7 @@
   (objc-send object "self"))
 
 (define (bool x)
-  (if (eqv? x 0) #f #t))
+  (if (zero? x) #f #t))
 
 (macro (if-bool form)
   `(if (bool ,(cadr form)) ,@(cddr form)))
@@ -38,9 +38,11 @@
         (log "hasBool = true")
         (log "hasBool = false"))
     (log "Test class name is:" (class-name test))
-    (if (eqvobj? "One" "Two")
-      (log "One == Two ?!")
-      (log "One != Two")))
+    (define one "One")
+    (define two "Two")
+    (if (eqvobj? one two)
+      (log one "==" two)
+      (log one "!=" two)))
     
   (log "Goodbye... BTW, magic number is" 'magicNumber "of class" 
     (class-name 'magicNumber))
