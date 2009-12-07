@@ -5,6 +5,7 @@
   int cnt;
 }
 - (void)displayObject:(id)s;
+- (BOOL)hasBool;
 @end
 
 @implementation Test
@@ -12,6 +13,11 @@
 - (void)displayObject:(id)s
 {
   NSLog(@"Test says [%d]: %@", cnt++, s);
+}
+
+- (BOOL)hasBool
+{
+  return NO;
 }
 
 @end
@@ -22,7 +28,8 @@ int main (int argc, const char * argv[])
   NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
   TinyScheme *ts = [[TinyScheme alloc] init];
-  [ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"];
+  if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"])
+    NSLog(@"cannot load init.scm");
 
   //Test *test = [[Test alloc] init];
   //[ts registerObject:test withName:@"test"];

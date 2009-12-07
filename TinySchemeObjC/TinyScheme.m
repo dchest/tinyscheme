@@ -56,10 +56,35 @@ pointer ts_objc_send(scheme *sc, pointer args)
   [inv retainArguments];
   [inv invoke];
     
-  if (strcmp([sig methodReturnType], @encode(void)) != 0) { // not void
+  //NSLog(@"## %@ -> %s", selName, [sig methodReturnType]);
+  // void
+  if (strcmp([sig methodReturnType], @encode(void)) == 0) { 
+    return sc->NIL;
+  } 
+  // Objects
+  else if (strcmp([sig methodReturnType], @encode(id)) == 0) {
     id result = nil;
     [inv getReturnValue:&result];
     return [ts objCTypeToSchemeType:result];
+  }
+  // Other types
+  else {
+    NSUInteger length = [[inv methodSignature] methodReturnLength];
+    void *buffer = (void *)malloc(length);
+    [inv getReturnValue:buffer];
+    pointer r;
+    if (strcmp([sig methodReturnType], @encode(int)) == 0)
+      r =  sc->vptr->mk_integer(sc, *(int *)buffer);
+    else if (strcmp([sig methodReturnType], @encode(unsigned int)) == 0)
+      r =  sc->vptr->mk_integer(sc, *(unsigned int *)buffer);
+    else if (strcmp([sig methodReturnType], @encode(long)) == 0)
+      r =  sc->vptr->mk_integer(sc, *(long *)buffer);
+    else if (strcmp([sig methodReturnType], @encode(unsigned long)) == 0)
+      r =  sc->vptr->mk_integer(sc, *(unsigned long *)buffer);
+    else if (strcmp([sig methodReturnType], @encode(char)) == 0)
+      r =  sc->vptr->mk_integer(sc, *(char *)buffer);
+    free(buffer);
+    return r;
   }
   return sc->NIL;
 }
@@ -163,8 +188,11 @@ pointer ts_log(scheme *sc, pointer args)
   else if ([obj isKindOfClass:[NSString class]])
     return sc_->vptr->mk_string(sc_, [obj UTF8String]);
   else if ([obj isKindOfClass:[NSNumber class]]) {
-    if (strcmp([obj objCType], @encode(int)) == 0)
-      return sc_->vptr->mk_integer(sc_, [obj intValue]);
+    if (strcmp([obj objCType], @encode(int)) == 0
+       || strcmp([obj objCType], @encode(unsigned int)) == 0
+       || strcmp([obj objCType], @encode(long)) == 0
+       || strcmp([obj objCType], @encode(unsigned long)) == 0)
+      return sc_->vptr->mk_integer(sc_, [obj longValue]);
     else if (strcmp([obj objCType], @encode(double)) == 0)
       return sc_->vptr->mk_real(sc_, [obj doubleValue]);
     else
