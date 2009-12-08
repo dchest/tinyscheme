@@ -53,11 +53,11 @@ pointer ts_objc_send(scheme *sc, pointer args)
   [inv setTarget:object];
   [inv setSelector:selector];
   
-  pointer curarg = sc->vptr->pair_cdr(args);
+  pointer curArgs = sc->vptr->pair_cdr(args);
   for (int i = 2; i < [sig numberOfArguments]; i++) {
-    curarg = sc->vptr->pair_cdr(curarg);
-    id argObj = [ts schemeTypeToObjCType:sc->vptr->pair_car(curarg)];
-    // Handle C types
+    curArgs = sc->vptr->pair_cdr(curArgs);
+    id argObj = [ts schemeTypeToObjCType:sc->vptr->pair_car(curArgs)];
+    // Handle types
     const char *argType = [sig getArgumentTypeAtIndex:i];
     if (strcmp(argType, @encode(id)) == 0) {
       [inv setArgument:&argObj atIndex:i];
@@ -97,9 +97,7 @@ pointer ts_objc_send(scheme *sc, pointer args)
   }
   [inv retainArguments];
   [inv invoke];
-    
-  //NSLog(@"## %@ -> %s", selName, [sig methodReturnType]);
-  
+      
   if (strcmp([sig methodReturnType], @encode(void)) == 0) { 
     // void
     return sc->NIL;
