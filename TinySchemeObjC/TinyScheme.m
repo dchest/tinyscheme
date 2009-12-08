@@ -59,32 +59,36 @@ pointer ts_objc_send(scheme *sc, pointer args)
   [inv invoke];
     
   //NSLog(@"## %@ -> %s", selName, [sig methodReturnType]);
-  // void
+  
   if (strcmp([sig methodReturnType], @encode(void)) == 0) { 
+    // void
     return sc->NIL;
-  } 
-  // Objects
-  else if (strcmp([sig methodReturnType], @encode(id)) == 0) {
+  } else if (strcmp([sig methodReturnType], @encode(id)) == 0) {
+    // objects
     id result = nil;
     [inv getReturnValue:&result];
     return [ts objCTypeToSchemeType:result];
-  }
-  // Other types
-  else {
+  } else {
+    // C types
     NSUInteger length = [[inv methodSignature] methodReturnLength];
+    const char *returnType = [sig methodReturnType];
     void *buffer = (void *)malloc(length);
     [inv getReturnValue:buffer];
     pointer r;
-    if (strcmp([sig methodReturnType], @encode(int)) == 0)
-      r =  sc->vptr->mk_integer(sc, *(int *)buffer);
-    else if (strcmp([sig methodReturnType], @encode(unsigned int)) == 0)
-      r =  sc->vptr->mk_integer(sc, *(unsigned int *)buffer);
-    else if (strcmp([sig methodReturnType], @encode(long)) == 0)
-      r =  sc->vptr->mk_integer(sc, *(long *)buffer);
-    else if (strcmp([sig methodReturnType], @encode(unsigned long)) == 0)
-      r =  sc->vptr->mk_integer(sc, *(unsigned long *)buffer);
-    else if (strcmp([sig methodReturnType], @encode(char)) == 0)
-      r =  sc->vptr->mk_integer(sc, *(char *)buffer);
+    if (strcmp(returnType, @encode(char)) == 0)
+      r = sc->vptr->mk_integer(sc, *(char *)buffer);
+    else if (strcmp(returnType, @encode(int)) == 0)
+      r = sc->vptr->mk_integer(sc, *(int *)buffer);
+    else if (strcmp(returnType, @encode(unsigned int)) == 0)
+      r = sc->vptr->mk_integer(sc, *(unsigned int *)buffer);
+    else if (strcmp(returnType, @encode(long)) == 0)
+      r = sc->vptr->mk_integer(sc, *(long *)buffer);
+    else if (strcmp(returnType, @encode(unsigned long)) == 0)
+      r = sc->vptr->mk_integer(sc, *(unsigned long *)buffer);
+    else if (strcmp(returnType, @encode(float)) == 0)
+      r = sc->vptr->mk_real(sc, *(float *)buffer);
+    else if (strcmp(returnType, @encode(double)) == 0)
+      r = sc->vptr->mk_real(sc, *(double *)buffer);
     free(buffer);
     return r;
   }
