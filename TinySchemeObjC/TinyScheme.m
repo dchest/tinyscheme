@@ -190,6 +190,7 @@ pointer ts_error(scheme *sc, pointer args)
 
 - (id)initSchemeWithSafeMode:(BOOL)safeMode // private
 {
+  isInSaveMode_ = safeMode;
   registeredObjects_ = [[NSMutableDictionary alloc] init];
   sc_ = scheme_init_new();
   scheme_set_external_data(sc_, self);
@@ -329,7 +330,7 @@ pointer ts_error(scheme *sc, pointer args)
 - (void)releaseRegisteredObjects;
 {
   [registeredObjects_ removeAllObjects];
-  if (!safeMode) // readd self
+  if (!isInSaveMode_) // readd self
     [self registerObject:self withName:@"current-objc-interface"];
 }
 

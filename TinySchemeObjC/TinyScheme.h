@@ -15,6 +15,7 @@
 @interface TinyScheme : NSObject {
   scheme *sc_;
   NSMutableDictionary *registeredObjects_;
+  BOOL isInSaveMode_;
 }
 - (id)init;
 // Safe mode disables introspection, classes and creation of new objects
