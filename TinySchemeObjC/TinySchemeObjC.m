@@ -36,6 +36,8 @@
 
 @end
 
+
+
 //
 // NOTE! Paths are currently hardcoded, change them to yours.
 //
@@ -49,7 +51,12 @@ int main (int argc, const char * argv[])
     NSLog(@"cannot load init.scm");
 
   @try {
-    [ts loadString:@"(some (scheme code) with errors))"];
+    [ts loadString:@""
+      " (define (logme x)  "
+      "   (log x))         "
+      "                    "
+      " (log-me \"test\")) " // <-- notice the error, calling log-me
+    ];
   }
   @catch (NSException *e) {
     NSLog(@"(This is *intentional*! --> Successfuly cought code with errors. "
@@ -66,6 +73,9 @@ int main (int argc, const char * argv[])
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");
 
+  [ts loadString:@""
+    " (logme \"Finished\")  " // <-- remember logme from above? It's still defined
+  ];
 
   [ts release];
   [pool drain];
