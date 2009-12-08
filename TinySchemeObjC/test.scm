@@ -29,7 +29,9 @@
 
 (define (eqvobj? x y)
   (ctrue? (-> x "isEqual:" y)))
-  
+ 
+(define YES 1)
+(define NO  0)   
 ;
 ; Demo
 ;
@@ -47,7 +49,9 @@
     (define two "Two")
     (if (eqvobj? one two)
       (log one "==" two)
-      (log one "!=" two)))
+      (log one "!=" two))
+    (-> test "testArgumentsWithBool:andString:" YES "string argument")
+    (log "Logging:" (-> test "testArgumentsWithFloat:andInt:" 66.28 65539)))
     
   (log "Goodbye... BTW, magic number is" 'magicNumber "of class" 
     (class-name 'magicNumber))

@@ -45,6 +45,10 @@ pointer ts_objc_send(scheme *sc, pointer args)
   NSMethodSignature *sig = 
     [object methodSignatureForSelector:selector];
 
+  if (!sig)
+    [NSException raise:TinySchemeException 
+                 format:@"Method ``%@'' not found in ``%@''", selName, object];
+
   NSInvocation *inv = [NSInvocation invocationWithMethodSignature:sig];
   [inv setTarget:object];
   [inv setSelector:selector];
@@ -52,8 +56,44 @@ pointer ts_objc_send(scheme *sc, pointer args)
   pointer curarg = sc->vptr->pair_cdr(args);
   for (int i = 2; i < [sig numberOfArguments]; i++) {
     curarg = sc->vptr->pair_cdr(curarg);
-    id arg = [ts schemeTypeToObjCType:sc->vptr->pair_car(curarg)];
-    [inv setArgument:&arg atIndex:i];
+    id argObj = [ts schemeTypeToObjCType:sc->vptr->pair_car(curarg)];
+    // Handle C types
+    const char *argType = [sig getArgumentTypeAtIndex:i];
+    if (strcmp(argType, @encode(id)) == 0) {
+      [inv setArgument:&argObj atIndex:i];
+    }
+    else if (strcmp(argType, @encode(char)) == 0) {
+      char a = [argObj charValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else if (strcmp(argType, @encode(int)) == 0) {
+      int a = [argObj intValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else if (strcmp(argType, @encode(unsigned int)) == 0) {
+      unsigned int a = [argObj unsignedIntValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else if (strcmp(argType, @encode(long)) == 0) {
+      long a = [argObj longValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else if (strcmp(argType, @encode(unsigned long)) == 0) {
+      unsigned long a = [argObj unsignedLongValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else if (strcmp(argType, @encode(float)) == 0) {
+      float a = [argObj floatValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else if (strcmp(argType, @encode(double)) == 0) {
+      double a = [argObj doubleValue];
+      [inv setArgument:&a atIndex:i];
+    }
+    else
+      [NSException raise:TinySchemeException
+                   format:@"Passing type ``%s''to objects is not supported",
+                    argType];
   }
   [inv retainArguments];
   [inv invoke];

@@ -15,6 +15,20 @@
   NSLog(@"Test says [%d]: %@", cnt++, s);
 }
 
+- (void)testArgumentsWithBool:(BOOL)b andString:(NSString *)s
+{
+  if (b)
+    NSLog(@"b=YES, s=%@", s);
+  else
+    NSLog(@"b=NO, s=%@", s);
+}
+
+- (NSString *)testArgumentsWithFloat:(float)f andInt:(int)i
+{
+  return [NSString stringWithFormat:@"float=%f int=%d", f, i];
+}
+
+
 - (BOOL)hasBool
 {
   return NO;
