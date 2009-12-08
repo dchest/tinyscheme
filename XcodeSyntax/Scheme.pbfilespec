@@ -1,0 +1,17 @@
+// Scheme.pbfilespec
+// Xcode 3.x language specification for Scheme
+// Put it into ~/Library/Application Support/Developer/Shared/Xcode/Specifications/
+
+(
+	{
+	  Identifier = sourcecode.scheme;
+	  BasedOn = sourcecode;
+	  Name = "Scheme Source";
+	  Extensions = ("scm");
+	  MIMETypes = ("text/scheme");
+	  ComputerLanguage = scheme;
+	  Language = "xcode.lang.scheme";
+	  IsTextFile = YES;
+	  IsSourceFile = YES;
+	}
+)

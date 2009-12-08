@@ -1,0 +1,86 @@
+// Xcode 3.x language specification for Scheme
+// Put it into ~/Library/Application Support/Developer/Shared/Xcode/Specifications/
+
+(
+
+// Keywords and identifiers
+
+    {
+        Identifier = "xcode.lang.scheme.keyword";
+        Syntax = {
+            StartChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ?*-><+-=";
+            Chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ?*-><+-=";
+            Words = (
+			"->", "*", "+", "-", "=", "<", ">",
+            "abs", "acos", "allocate-heap",
+            "and", "append", "append2", "apply", "apropos", "aref", "array->hexstr", "aset",
+            "ash", "asin", "ass", "ass", "assoc", "assq", "assv", "atan", "atan2",
+            "base64decode", "base64encode", "begin", "benchmark-eval", "benchmark-funcall1",
+            "benchmark-funcall2", "bit-and", "bit-not", "bit-or", "bit-xor", "butlast",
+            "bytes-append", "caaar", "caadr", "caar", "cadar", "caddr", "cadr", "car",
+            "*catch", "cdaar", "cdadr", "cdar", "cddar", "cdddr", "cddr", "cdr",
+            "%%closure", "%%closure-code", "%%closure-env", "cond", "cons", "cons-array",
+            "copy-list", "cos", "define", "delq", "env-lookup", "eof-val", "eq?", "equal?",
+            "eqv?", "error", "eval", "exp", "fast-load", "fast-print", "fast-read",
+            "fast-save", "fclose", "fflush", "fmod", "fopen", "fread", "fseek", "ftell",
+            "fwrite", "gc", "gc-info", "gc-status", "get", "getc", "help", "hexstr->bytes",
+            "href", "hset", "if", "intern", "lambda", "larg-default", "last", "last-c-error",
+            "let", "let*", "length", "list", "lkey-default", "load", "log", "lref-default", "make-list",
+            "mapcar", "mapcar1", "mapcar2", "max", "member", "memq", "memv", "min", "nconc",
+            "not", "nreverse", "nth", "null?", "number?", "number->string", "or", "pair?",
+            "parse-number", "parser_fasl", "parser_fasl_hook", "parser_read", "pow", "prin1",
+            "print", "print-to-string", "prog1", "putc", "putprop", "puts", "qsort", "quit",
+            "quote", "rand", "read", "read-from-string", "realtime", "regcomp", "regerror",
+            "regexec", "require", "reverse", "runtime", "save-forms", "set!", "set-car!",
+            "set-cdr!", "set-eval-history", "setprop", "set-symbol-value!", "sin", "sqrt",
+            "srand", "%%stack-limit", "strbreakup", "strcat", "strcmp", "strcpy", "strcspn",
+            "string?", "string-append", "string-dimension", "string-downcase", "string-length",
+            "string-lessp", "string->number", "string-search", "string-trim",
+            "string-trim-left", "string-trim-right", "string-upcase", "strspn", "subset",
+            "substring", "substring-equal?", "swrite", "sxhash", "symbol?", "symbol-bound?",
+            "symbolconc", "symbol-value", "tan", "the-environment", "*throw", "trace",
+            "trunc", "typeof", "unbreakupstr", "ungetc", "untrace", "verbose", "while",
+            "writes"
+
+        );
+            Type = "xcode.syntax.keyword";
+            AltType = "xcode.syntax.identifier";    // non-keywords are identifiers
+        };
+    },
+
+
+// Strings, numbers and comments
+
+    {
+        Identifier = "xcode.lang.scheme";
+        Description = "Scheme Colouring";
+        BasedOn = "xcode.lang.simpleColoring";
+        IncludeInMenu = YES;
+        Name = "Scheme";
+        Syntax = {
+            IncludeRules = (
+                "xcode.lang.scheme.comment",
+                "xcode.lang.string",
+                "xcode.lang.number",
+                "xcode.lang.scheme.keyword",
+            );
+            Type = "xcode.syntax.plain";
+        };
+    },
+    
+    {
+        Identifier = "xcode.lang.scheme.comment";
+        Syntax = {
+            Start = ";";
+            End = "\n";
+            Foldable = NO;
+            IncludeRules = (
+                "xcode.lang.url",
+                "xcode.lang.url.mail",
+                "xcode.lang.comment.mark"
+            );
+            Type = "xcode.syntax.comment";
+        };
+    }
+)
+
