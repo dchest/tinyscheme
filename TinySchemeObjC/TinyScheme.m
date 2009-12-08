@@ -99,11 +99,11 @@ pointer ts_objc_class(scheme *sc, pointer args)
   if (!sc->vptr->is_string(sc->vptr->pair_car(args)))
     [NSException raise:TinySchemeException format:
       @"Argument to objc-class is not string"];
-  // get symbol
-  char *symbol = sc->vptr->string_value(sc->vptr->pair_car(args));
-  NSString *symString = [NSString stringWithUTF8String:symbol];
-  [ts registerClass:NSClassFromString(symString) withName:symString];
-  return sc->vptr->mk_symbol(sc, symbol);
+  // get class name
+  char *cname = sc->vptr->string_value(sc->vptr->pair_car(args));
+  NSString *cnameString = [NSString stringWithUTF8String:cname];
+  [ts registerClass:NSClassFromString(cnameString) withName:cnameString];
+  return sc->vptr->mk_symbol(sc, cname); // case sensitive
 }
 
 pointer ts_log(scheme *sc, pointer args)
@@ -258,10 +258,11 @@ pointer ts_error(scheme *sc, pointer args)
     
     // If object is not registered, create a new name from hash
     if (!name) {
-      name = [NSString stringWithFormat:@"objc-%lu",(unsigned long)[obj hash]];
+      name = [NSString stringWithFormat:@"objc-%@-%lu",
+                [obj className], (unsigned long)[obj hash]];
       [self registerObject:obj withName:name];
     }
-    return sc_->vptr->mk_symbol(sc_, [name UTF8String]);
+    return sc_->vptr->mk_symbol(sc_, [[name lowercaseString] UTF8String]);
   }
   //[NSException raise:TinySchemeException format:@"Unknown type of %@", obj];
 }
