@@ -10,6 +10,7 @@
 
 @interface TinyScheme ()
 @property(retain) NSMutableDictionary *registeredObjects;
+- (id)initSchemeWithSafeMode:(BOOL)safeMode;
 - (pointer)objCTypeToSchemeType:(id)obj;
 - (id)schemeTypeToObjCType:(pointer)ptr;
 - (void)registerClass:(id)object withName:(NSString *)name;
@@ -133,6 +134,20 @@ pointer ts_error(scheme *sc, pointer args)
 {
   if (![super init])
     return nil;
+  [self initSchemeWithSafeMode:NO];
+  return self;
+}
+
+- (id)initInSafeMode
+{
+  if (![super init])
+    return nil;
+  [self initSchemeWithSafeMode:YES];
+  return self;  
+}
+
+- (id)initSchemeWithSafeMode:(BOOL)safeMode // private
+{
   registeredObjects_ = [[NSMutableDictionary alloc] init];
   sc_ = scheme_init_new();
   scheme_set_external_data(sc_, self);
@@ -140,24 +155,26 @@ pointer ts_error(scheme *sc, pointer args)
        sc_, 
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "objc-send"),
-       sc_->vptr->mk_foreign_func(sc_, ts_objc_send)); 
-  sc_->vptr->scheme_define( 
-       sc_, 
-       sc_->global_env, 
-       sc_->vptr->mk_symbol(sc_, "objc-class"),
-       sc_->vptr->mk_foreign_func(sc_, ts_objc_class)); 
-  sc_->vptr->scheme_define( 
+       sc_->vptr->mk_foreign_func(sc_, ts_objc_send));
+  if (!safeMode) {
+    sc_->vptr->scheme_define(
+         sc_, 
+         sc_->global_env, 
+         sc_->vptr->mk_symbol(sc_, "objc-class"),
+         sc_->vptr->mk_foreign_func(sc_, ts_objc_class));
+  }
+  sc_->vptr->scheme_define(
        sc_, 
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "log"),
        sc_->vptr->mk_foreign_func(sc_, ts_log)); 
-  sc_->vptr->scheme_define( 
+  sc_->vptr->scheme_define(
        sc_, 
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "error"),
        sc_->vptr->mk_foreign_func(sc_, ts_error));
-  [self registerObject:self withName:@"current-objc-interface"];
-  return self;
+  if (!safeMode)
+    [self registerObject:self withName:@"current-objc-interface"];
 }
 
 - (void)dealloc

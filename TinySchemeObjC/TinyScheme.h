@@ -16,12 +16,18 @@
   scheme *sc_;
   NSMutableDictionary *registeredObjects_;
 }
+- (id)init;
+// Safe mode disables introspection, classes and creation of new objects
+// (no 'current-objc-interface, objc-class defined)
+- (id)initInSafeMode;
+
 - (BOOL)loadFileWithURL:(NSURL *)url;
 - (BOOL)loadFileWithPath:(NSString *)path;
 - (void)loadString:(NSString *)string;
 - (void)registerObject:(id)object withName:(NSString *)name;
 
 // Use this instead of registeredObjects to inspect registered objects in Scheme
-@property(readonly) NSDictionary *registeredObjectsCopy;
+@property(readonly, retain) NSDictionary *registeredObjectsCopy;
+
 
 @end
