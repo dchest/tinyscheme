@@ -6,4 +6,4 @@ Put these files into ~/Library/Application Support/Developer/Shared/Xcode/Specif
 
 You can edit keywords in `Scheme.xlangspec`.
 
-This thing recognized ".scm" extension.
+This thing recognizes `.scm` extension.
