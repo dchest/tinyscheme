@@ -1,23 +1,25 @@
 ;
 ; ObjC helpers
 ;
+(define -> objc-send)
+
 (define (alloc class-name)
-  (objc-send (objc-class class-name) "alloc"))
+  (-> (objc-class class-name) "alloc"))
 
 (define (init obj)
-  (objc-send obj "init"))
+  (-> obj "init"))
 
 (define (new class-name)
   (init (alloc class-name)))
 
 (define (class-name object)
-  (objc-send object "className"))
+  (-> object "className"))
 
 (define (self object)
-  (objc-send object "self"))
+  (-> object "self"))
 
 (define (description object)
-  (objc-send object "description"))
+  (-> object "description"))
 
 (define (ctrue? x)
   (if (zero? x) #f #t))
@@ -26,7 +28,7 @@
   `(if (ctrue? ,(cadr form)) ,@(cddr form)))
 
 (define (eqvobj? obj1 obj2)
-  (ctrue? (objc-send obj1 "isEqual:" obj2)))
+  (ctrue? (-> obj1 "isEqual:" obj2)))
   
 ;
 ; Demo
@@ -35,9 +37,9 @@
   (log "Hello")
 
   (let ((test (new "Test")))
-    (objc-send test "displayObject:" "Hello from Test class instance!")
-    (objc-send test "displayObject:" "...and hello again")
-    (if-bool (objc-send test "hasBool")
+    (-> test "displayObject:" "Hello from Test class instance!")
+    (-> test "displayObject:" "...and hello again")
+    (if-bool (-> test "hasBool")
         (log "hasBool = true")
         (log "hasBool = false"))
     (log "Test class name is:" (class-name test))
@@ -56,6 +58,6 @@
   ;
   (log "\n---\n"
        "Listing registered objects:\n"
-      (description (objc-send 'current-objc-interface "registeredObjectsCopy"))
+      (description (-> 'current-objc-interface "registeredObjectsCopy"))
        "\n---")
 )
