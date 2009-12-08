@@ -36,6 +36,9 @@
 
 @end
 
+//
+// NOTE! Paths are currently hardcoded, change them to yours.
+//
 
 int main (int argc, const char * argv[]) 
 {
