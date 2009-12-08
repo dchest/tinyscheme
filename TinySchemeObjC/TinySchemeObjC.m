@@ -45,6 +45,14 @@ int main (int argc, const char * argv[])
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"])
     NSLog(@"cannot load init.scm");
 
+  @try {
+    [ts loadString:@"(some (scheme code) with errors))"];
+  }
+  @catch (NSException *e) {
+    NSLog(@"(This is *intentional*! --> Successfuly cought code with errors. "
+           "The exception was: %@ reason: ``%@'')", [e name], [e reason]);
+  }
+
   // Expose some objects to scheme
   NSNumber *magicNumber = [NSNumber numberWithInt:42];
   [ts registerObject:magicNumber withName:@"magicNumber"];
@@ -52,13 +60,6 @@ int main (int argc, const char * argv[])
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");
 
-  @try {
-    [ts loadString:@"(some (scheme code) with errors))"];
-  }
-  @catch (NSException *e) {
-    NSLog(@"(Successfuly cought code with errors. This is intentional! "
-           "The exception was: %@ reason: ``%@'')", [e name], [e reason]);
-  }
 
   [ts release];
   [pool drain];

@@ -53,7 +53,7 @@
     (-> test "testArgumentsWithBool:andString:" YES "string argument")
     (log "Logging:" (-> test "testArgumentsWithFloat:andInt:" 66.28 65539)))
     
-  (log "Goodbye... BTW, magic number is" 'magicNumber "of class" 
+  (log "BTW, magic number is" 'magicNumber "of class" 
     (class-name 'magicNumber))
   
   ;
@@ -64,4 +64,6 @@
        "Listing registered objects:\n"
       (description (-> 'current-objc-interface "registeredObjectsCopy"))
        "\n---")
+       
+  (log "Goodbye!")
 )
