@@ -326,4 +326,11 @@ pointer ts_error(scheme *sc, pointer args)
     [NSException raise:TinySchemeException format:@"Unknown scheme type"];
 }
 
+- (void)releaseRegisteredObjects;
+{
+  [registeredObjects_ removeAllObjects];
+  if (!safeMode) // readd self
+    [self registerObject:self withName:@"current-objc-interface"];
+}
+
 @end

@@ -22,6 +22,9 @@
     
   (log "BTW, magic number is" 'magicNumber "of class" 
     (class-name 'magicNumber))
+
+  (let ((fm (new "NSFileManager")))
+    (log "App folder name:" (-> fm "displayNameAtPath:" "/Applications")))
   
   ;
   ; 'current-objc-interface points to instance of TinyScheme ObjC class
@@ -33,4 +36,5 @@
        "\n---")
        
   (log "Goodbye!")
+  
 )

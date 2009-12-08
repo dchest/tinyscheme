@@ -25,6 +25,7 @@
 - (BOOL)loadFileWithPath:(NSString *)path;
 - (void)loadString:(NSString *)string;
 - (void)registerObject:(id)object withName:(NSString *)name;
+- (void)releaseRegisteredObjects;
 
 // Use this instead of registeredObjects to inspect registered objects in Scheme
 @property(readonly, retain) NSDictionary *registeredObjectsCopy;
