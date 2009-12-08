@@ -56,6 +56,9 @@ int main (int argc, const char * argv[])
   // Expose some objects to scheme
   NSNumber *magicNumber = [NSNumber numberWithInt:42];
   [ts registerObject:magicNumber withName:@"magicNumber"];
+
+  if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/objc.scm"])
+    NSLog(@"cannot load objc.scm");
   
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");

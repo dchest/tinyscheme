@@ -30,6 +30,7 @@
 /* Begin PBXFileReference section */
 		08FB7796FE84155DC02AAC07 /* TinySchemeObjC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TinySchemeObjC.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		0A31902D10CDF66700E25F84 /* objc.scm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.scheme; path = objc.scm; sourceTree = "<group>"; };
 		0AD5DEC310CD4C9E003A4051 /* libtinyscheme.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtinyscheme.a; path = ../libtinyscheme.a; sourceTree = SOURCE_ROOT; };
 		0AD5DEC710CD4CA8003A4051 /* scheme-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "scheme-private.h"; path = "../scheme-private.h"; sourceTree = SOURCE_ROOT; };
 		0AD5DEC810CD4CB3003A4051 /* scheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scheme.h; path = ../scheme.h; sourceTree = SOURCE_ROOT; };
@@ -68,6 +69,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				0A31902D10CDF66700E25F84 /* objc.scm */,
 				0AD5DFDF10CD7325003A4051 /* test.scm */,
 				0AD5DECB10CD4CC2003A4051 /* TinyScheme.h */,
 				0AD5DECC10CD4CC2003A4051 /* TinyScheme.m */,
