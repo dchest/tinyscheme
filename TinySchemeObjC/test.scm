@@ -42,15 +42,15 @@
   ;
   ; Create method 
   ;
-  (objc-add-method (objc-class "NSString") "greetingForName:" "@@:@"
+  (objc-add-method (objc-class "NSObject") "greetingForName:" "@@:@"
                    (lambda (x) (string-append "Hello, " x)))
-  (log "Result of our method: " 
-       (-> "(test string object)" "greetingForName:" "Dima"))
+  (log "Result of our method: " (description (new "NSObject"))
+       (-> (new "NSObject") "greetingForName:" "Dima"))
 
   ;
   ; Create class
   ;
-  (let ((MyClass (objc-alloc-class (objc-class "NSFileManager") "MyClass")))
+  (let ((MyClass (objc-alloc-class (objc-class "NSObject") "MyClass")))
     ;(logRegistered)
     (log "adding method")
     (objc-add-method MyClass "sayGoodbyeTo:" "@@:@"

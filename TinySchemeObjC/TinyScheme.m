@@ -300,7 +300,7 @@ pointer ts_objc_add_method(scheme *sc, pointer args)
                  format:@"No types string in arguments for objc-add-method"];
  
   NSValue *funcPtr = [NSValue valueWithPointer:sc->vptr->pair_car(nextArg)];
-  nextArg =  sc->vptr->pair_cdr(nextArg);
+  //nextArg =  sc->vptr->pair_cdr(nextArg);
      
   [[ts registeredMethods] setObject:funcPtr forKey:methodName];
   class_addMethod(klass, NSSelectorFromString(methodName), (IMP)invokeMethod,
@@ -492,6 +492,8 @@ pointer ts_error(scheme *sc, pointer args)
 // Private method similar to registerObject, but preserves case
 - (void)registerClass:(Class)klass withName:(NSString *)name 
 {
+  //[[NSGarbageCollector defaultCollector]
+  //  disableCollectorForPointer:klass];
   [registeredObjects_ setObject:[TSClassWrapper wrapperWithClass:klass] 
                       forKey:name];
 }
