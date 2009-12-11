@@ -50,9 +50,6 @@
 
 @end
 
-
-
-#define SCI sc->vptr
 #define IsNull(x) (x == nil || x == (id)[NSNull null]) 
 
 NSString *TinySchemeException = @"TinySchemeException";
@@ -256,7 +253,6 @@ id invokeMethod(id self, SEL _cmd, ...)
     scArgs = _cons(sc, curArg, scArgs, 1);
   }
   
-  //NSLog(@"invoking %@", selName);
   NSValue *funcPtr = [[sharedInstance registeredMethods] objectForKey:selName];
   if (IsNull(funcPtr)) {
     [NSException raise:TinySchemeException 

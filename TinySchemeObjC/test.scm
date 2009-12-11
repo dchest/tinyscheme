@@ -30,12 +30,10 @@
   ; 'current-objc-interface points to instance of TinyScheme ObjC class
   ; which runs us. Let me show how to manupilate it:
   ;
-  (define (logRegistered)
-    (log "\n---\n"
-        "Listing registered objects:\n"
-        (description (-> 'current-objc-interface "registeredObjectsCopy"))
-        "\n---"))
-  (logRegistered)     
+  (log "\n---\n"
+      "Listing registered objects:\n"
+      (description (-> 'current-objc-interface "registeredObjectsCopy"))
+      "\n---")
   
   ;
   ; Add method to NSObject
