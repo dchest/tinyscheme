@@ -15,8 +15,11 @@
 @interface TinyScheme : NSObject {
   scheme *sc_;
   NSMutableDictionary *registeredObjects_;
+  NSMutableDictionary *registeredMethods_;
   BOOL isInSaveMode_;
+  BOOL isShared_;
 }
++ (TinyScheme *)sharedTinyScheme;
 - (id)init;
 // Safe mode disables introspection, classes and creation of new objects
 // (no 'current-objc-interface, objc-class defined)
@@ -30,6 +33,8 @@
 
 // Use this instead of registeredObjects to inspect registered objects in Scheme
 @property(readonly, retain) NSDictionary *registeredObjectsCopy;
-
+@property(retain) NSMutableDictionary *registeredMethods;
+@property(assign) BOOL shared;
+@property(readonly) scheme *schemePtr;
 
 @end

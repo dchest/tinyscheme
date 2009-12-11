@@ -7,6 +7,7 @@
 //
 
 #import "TinyScheme.h"
+#import <ObjC/runtime.h>
 
 @interface TinyScheme ()
 @property(retain) NSMutableDictionary *registeredObjects;
@@ -21,6 +22,12 @@
 
 NSString *TinySchemeException = @"TinySchemeException";
 
+static TinyScheme *sharedInstance;
+
+// Send message to object
+//
+// (objc-send object "method:Name:" arg1 arg2)
+//
 pointer ts_objc_send(scheme *sc, pointer args) 
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
@@ -97,7 +104,7 @@ pointer ts_objc_send(scheme *sc, pointer args)
   }
   [inv retainArguments];
   [inv invoke];
-      
+
   if (strcmp([sig methodReturnType], @encode(void)) == 0) { 
     // void
     return sc->NIL;
@@ -133,6 +140,10 @@ pointer ts_objc_send(scheme *sc, pointer args)
   return sc->NIL;
 }
 
+// Register and return Class
+//
+// (objc-class "ClassName")
+//
 pointer ts_objc_class(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
@@ -148,6 +159,10 @@ pointer ts_objc_class(scheme *sc, pointer args)
   return sc->vptr->mk_symbol(sc, cname); // case sensitive
 }
 
+// Output arguments with NSLog
+//
+// (log arg1 arg2 arg3)
+//
 pointer ts_log(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
@@ -163,6 +178,108 @@ pointer ts_log(scheme *sc, pointer args)
   return sc->NIL;
 }
 
+
+// Invokes Scheme function from ObjC method
+id invokeMethod(id self, SEL _cmd, ...)
+{
+  TinyScheme *ts = sharedInstance;
+  scheme *sc = [sharedInstance schemePtr];
+  NSString *selName = NSStringFromSelector(_cmd);
+  
+  Method method = class_getInstanceMethod([self class], _cmd);
+  unsigned argNum = method_getNumberOfArguments(method);
+  
+  va_list list;
+  char argType[10];
+  va_start(list, _cmd);
+  pointer scArgs = sc->NIL;
+  
+  for(int i = 2; i < argNum; i++) {
+    method_getArgumentType(method, i, argType, 10);
+    pointer curArg;
+    if (strcmp(argType, @encode(void)) == 0) { 
+      curArg = sc->NIL;
+    } else if (strcmp(argType, @encode(id)) == 0) {
+      curArg = [ts objCTypeToSchemeType:va_arg(list, id)];
+    } else {
+      // C types
+      if (strcmp(argType, @encode(char)) == 0)
+        curArg = sc->vptr->mk_integer(sc, va_arg(list, char));
+      else if (strcmp(argType, @encode(int)) == 0)
+        curArg = sc->vptr->mk_integer(sc, va_arg(list, int));
+      else if (strcmp(argType, @encode(unsigned int)) == 0)
+        curArg = sc->vptr->mk_integer(sc, va_arg(list, unsigned int));
+      else if (strcmp(argType, @encode(long)) == 0)
+        curArg = sc->vptr->mk_integer(sc, va_arg(list, long));
+      else if (strcmp(argType, @encode(unsigned long)) == 0)
+        curArg = sc->vptr->mk_integer(sc, va_arg(list, unsigned long));
+      else if (strcmp(argType, @encode(float)) == 0)
+        curArg = sc->vptr->mk_real(sc, va_arg(list, float));
+      else if (strcmp(argType, @encode(double)) == 0)
+        curArg = sc->vptr->mk_real(sc, va_arg(list, double));
+    }
+    scArgs = _cons(sc, curArg, scArgs, 1);
+  }
+  
+  //NSLog(@"invoking %@", selName);
+  NSValue *funcPtr = [[sharedInstance registeredMethods] objectForKey:selName];
+  if (IsNull(funcPtr)) {
+    [NSException raise:TinySchemeException 
+                 format:@"Selector %@ is not registered", selName];
+  }
+  pointer tmp = sc->dump; // save current dump, because sheme_call resets it
+  scheme_call(sc, (pointer)[funcPtr pointerValue], scArgs);
+  sc->dump = tmp; // restore dump
+  return [ts schemeTypeToObjCType:sc->value];
+}
+
+// Add method to class
+//
+// (objc-add-method class "method:name" "types" function)
+//
+pointer ts_objc_add_method(scheme *sc, pointer args)
+{
+  TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  if (![ts shared])
+    [NSException raise:TinySchemeException 
+                 format:@"Adding methods is only supported for "
+                          "shared instances of TinyScheme"];
+
+  if (args == sc->NIL)
+    [NSException raise:TinySchemeException 
+                 format:@"No arguments to objc-add-method"];
+  pointer nextArg = args;
+  Class klass = [ts schemeTypeToObjCType:sc->vptr->pair_car(nextArg)];
+  nextArg =  sc->vptr->pair_cdr(nextArg);
+  if (!klass)
+    [NSException raise:TinySchemeException 
+                 format:@"No class found for objc-add-method"];
+  NSString *methodName = [ts schemeTypeToObjCType:sc->vptr->pair_car(nextArg)];
+  nextArg =  sc->vptr->pair_cdr(nextArg);
+  if (IsNull(methodName))
+    [NSException raise:TinySchemeException 
+                 format:@"No method name in arguments for objc-add-method"];
+
+  NSString *types = [ts schemeTypeToObjCType:sc->vptr->pair_car(nextArg)];
+  nextArg =  sc->vptr->pair_cdr(nextArg);
+  if (IsNull(types))
+    [NSException raise:TinySchemeException 
+                 format:@"No types string in arguments for objc-add-method"];
+ 
+  NSValue *funcPtr = [NSValue valueWithPointer:sc->vptr->pair_car(nextArg)];
+  nextArg =  sc->vptr->pair_cdr(nextArg);
+     
+  [[ts registeredMethods] setObject:funcPtr forKey:methodName];
+  class_addMethod(klass, NSSelectorFromString(methodName), (IMP)invokeMethod,
+                  [types UTF8String]);
+  
+  return sc->T;
+}
+
+// Raise exception
+//
+// (error "description")
+//
 pointer ts_error(scheme *sc, pointer args) 
 {
   [NSException raise:TinySchemeException format:@"Scheme error: %s", 
@@ -171,6 +288,20 @@ pointer ts_error(scheme *sc, pointer args)
 
 @implementation TinyScheme
 @synthesize registeredObjects=registeredObjects_;
+@synthesize registeredMethods=registeredMethods_;
+@synthesize shared=isShared_;
+@synthesize schemePtr=sc_;
+
++ (TinyScheme *)sharedTinyScheme
+{
+  @synchronized(self) {
+    if (sharedInstance == nil) {
+      sharedInstance = [[TinyScheme alloc] init];
+      sharedInstance.shared = YES;
+    }
+  }
+  return sharedInstance;
+}
 
 - (id)init
 {
@@ -192,6 +323,7 @@ pointer ts_error(scheme *sc, pointer args)
 {
   isInSaveMode_ = safeMode;
   registeredObjects_ = [[NSMutableDictionary alloc] init];
+  registeredMethods_ = [[NSMutableDictionary alloc] init];
   sc_ = scheme_init_new();
   scheme_set_external_data(sc_, self);
   sc_->vptr->scheme_define( 
@@ -205,6 +337,11 @@ pointer ts_error(scheme *sc, pointer args)
          sc_->global_env, 
          sc_->vptr->mk_symbol(sc_, "objc-class"),
          sc_->vptr->mk_foreign_func(sc_, ts_objc_class));
+    sc_->vptr->scheme_define(
+         sc_, 
+         sc_->global_env, 
+         sc_->vptr->mk_symbol(sc_, "objc-add-method"),
+         sc_->vptr->mk_foreign_func(sc_, ts_objc_add_method));
   }
   sc_->vptr->scheme_define(
        sc_, 
@@ -223,6 +360,7 @@ pointer ts_error(scheme *sc, pointer args)
 - (void)dealloc
 {
   [registeredObjects_ release];
+  [registeredMethods_ release];
   scheme_deinit(sc_);
 }
 

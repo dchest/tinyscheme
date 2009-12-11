@@ -46,7 +46,8 @@ int main (int argc, const char * argv[])
 {
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-  TinyScheme *ts = [[TinyScheme alloc] init];
+  TinyScheme *ts = [TinyScheme sharedTinyScheme];
+  //[[TinyScheme alloc] init];
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"])
     NSLog(@"cannot load init.scm");
 

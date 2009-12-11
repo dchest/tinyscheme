@@ -37,4 +37,12 @@
        
   (log "Goodbye!")
   
+  ;
+  ; Create method 
+  ;
+  (objc-add-method (objc-class "NSString") "greetingForName:" "@@:@"
+                   (lambda (x) (string-append "Hello, " x)))
+
+  (log "Result of our method: " 
+       (-> "(test string object)" "greetingForName:" "Dima"))
 )
