@@ -35,27 +35,22 @@
         "Listing registered objects:\n"
         (description (-> 'current-objc-interface "registeredObjectsCopy"))
         "\n---"))
-  ;(logRegistered)
-       
-  ;(log "Goodbye!")
+  (logRegistered)     
   
   ;
-  ; Create method 
+  ; Add method to NSObject
   ;
   (objc-add-method (objc-class "NSObject") "greetingForName:" "@@:@"
                    (lambda (x) (string-append "Hello, " x)))
   (log "Result of our method: " (description (new "NSObject"))
        (-> (new "NSObject") "greetingForName:" "Dima"))
-
   ;
-  ; Create class
+  ; Create class and a method to it
   ;
   (let ((MyClass (objc-alloc-class (objc-class "NSObject") "MyClass")))
-    ;(logRegistered)
     (log "adding method")
     (objc-add-method MyClass "sayGoodbyeTo:" "@@:@"
                      (lambda (name) (log "Bye-bye, " name "!")))
-    ;(log "registering class")
     (objc-register-class MyClass)
     (let ((myObj (new "MyClass")))
          (-> myObj "sayGoodbyeTo:" "everyone")))

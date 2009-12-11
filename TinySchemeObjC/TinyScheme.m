@@ -17,7 +17,9 @@
 - (void)registerClass:(id)object withName:(NSString *)name;
 @end
 
-
+// 
+// Wrapper for Objective-C Class for adding it into registeredObjects
+//
 @interface TSClassWrapper : NSObject
 {
    NSValue *value;
@@ -299,8 +301,12 @@ pointer ts_objc_add_method(scheme *sc, pointer args)
     [NSException raise:TinySchemeException 
                  format:@"No types string in arguments for objc-add-method"];
  
-  NSValue *funcPtr = [NSValue valueWithPointer:sc->vptr->pair_car(nextArg)];
-  //nextArg =  sc->vptr->pair_cdr(nextArg);
+  pointer func = sc->vptr->pair_car(nextArg);
+  // Assign func to some generated symbol to prevent it from being collected
+  // by Scheme's gc
+  sc->vptr->scheme_define(sc, sc->envir, sc->vptr->gensym(sc), func);
+
+  NSValue *funcPtr = [NSValue valueWithPointer:func];
      
   [[ts registeredMethods] setObject:funcPtr forKey:methodName];
   class_addMethod(klass, NSSelectorFromString(methodName), (IMP)invokeMethod,
@@ -346,22 +352,11 @@ pointer ts_objc_register_class(scheme *sc, pointer args)
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   if (args == sc->NIL)
     [NSException raise:TinySchemeException 
-                 format:@"No arguments to objc-alloc-class"];
+                 format:@"No arguments to objc-register-class"];
   Class klass = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
   
   NSString *className = nil;
-  // find registered class name
-//  for (NSString *key in [ts registeredObjects]) {
-//    if ([[[ts registeredObjects] objectForKey:key] isEqual:
-//      [NSValue valueWithPointer:klass]]) {
-//      className = key;
-//      break;
-//    }
-//  }
-//  Class klass = (Class)[classValue pointerValue];
   objc_registerClassPair(klass);
-  // re-register class
-  //[ts registerClass:klass withName:NSStringFromClass(klass)];
   return sc->T;
 }
 
@@ -372,8 +367,10 @@ pointer ts_objc_register_class(scheme *sc, pointer args)
 //
 pointer ts_error(scheme *sc, pointer args) 
 {
-  [NSException raise:TinySchemeException format:@"Scheme error: %s", 
-    sc->vptr->string_value(sc->vptr->pair_car(args))];
+  TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  [NSException raise:TinySchemeException format:@"Scheme error: %s (%@)", 
+    sc->vptr->string_value(sc->vptr->pair_car(args)),
+    [ts schemeTypeToObjCType:sc->value]];
 }
 
 @implementation TinyScheme
