@@ -17,6 +17,39 @@
 - (void)registerClass:(id)object withName:(NSString *)name;
 @end
 
+
+@interface TSClassWrapper : NSObject
+{
+   NSValue *value;
+}
++ (TSClassWrapper *)wrapperWithClass:(Class)klass;
+@property(retain) NSValue *value;
+@end
+
+@implementation TSClassWrapper
+@synthesize value;
+
++ (BOOL)isClassWrapper 
+{
+  return YES;
+}
+
++ (TSClassWrapper *)wrapperWithClass:(Class)klass
+{
+  TSClassWrapper *wrapper = [[TSClassWrapper alloc] init];
+  wrapper.value = [NSValue valueWithPointer:klass];
+  return wrapper;
+}
+
+- (Class)unwrapClass
+{
+  return (Class)[self.value pointerValue];
+}
+
+@end
+
+
+
 #define SCI sc->vptr
 #define IsNull(x) (x == nil || x == (id)[NSNull null]) 
 
@@ -276,6 +309,63 @@ pointer ts_objc_add_method(scheme *sc, pointer args)
   return sc->T;
 }
 
+// Allocates new class (requires subsequent call to objc-register-class)
+// 
+// (objc-alloc-class superclass "ClassName") 
+//
+// Returns class name
+//
+pointer ts_objc_alloc_class(scheme *sc, pointer args)
+{
+  TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  if (args == sc->NIL)
+    [NSException raise:TinySchemeException 
+                 format:@"No arguments to objc-alloc-class"];
+  Class superclass = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
+  if (IsNull(superclass))
+    [NSException raise:TinySchemeException 
+                 format:@"Undefined superclass for objc-alloc-class"];
+  NSString *className = [ts schemeTypeToObjCType:
+                          sc->vptr->pair_car(sc->vptr->pair_cdr(args))];
+  
+  Class klass = objc_allocateClassPair(superclass, [className UTF8String], 0);
+  if (klass == Nil)
+    [NSException raise:TinySchemeException 
+                 format:@"objc-alloc-class: Cannot allocate class %@", className];
+  [ts registerClass:klass withName:className];
+  return sc->vptr->mk_symbol(sc, [className UTF8String]);
+}
+
+// Registers class with runtime.
+// Call this after objc-class-alloc and adding methods to make class available
+//
+// (objc-register-class class)
+//
+pointer ts_objc_register_class(scheme *sc, pointer args)
+{
+  TinyScheme *ts = (TinyScheme *)sc->ext_data;
+  if (args == sc->NIL)
+    [NSException raise:TinySchemeException 
+                 format:@"No arguments to objc-alloc-class"];
+  Class klass = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
+  
+  NSString *className = nil;
+  // find registered class name
+//  for (NSString *key in [ts registeredObjects]) {
+//    if ([[[ts registeredObjects] objectForKey:key] isEqual:
+//      [NSValue valueWithPointer:klass]]) {
+//      className = key;
+//      break;
+//    }
+//  }
+//  Class klass = (Class)[classValue pointerValue];
+  objc_registerClassPair(klass);
+  // re-register class
+  //[ts registerClass:klass withName:NSStringFromClass(klass)];
+  return sc->T;
+}
+
+
 // Raise exception
 //
 // (error "description")
@@ -342,6 +432,16 @@ pointer ts_error(scheme *sc, pointer args)
          sc_->global_env, 
          sc_->vptr->mk_symbol(sc_, "objc-add-method"),
          sc_->vptr->mk_foreign_func(sc_, ts_objc_add_method));
+    sc_->vptr->scheme_define(
+         sc_, 
+         sc_->global_env, 
+         sc_->vptr->mk_symbol(sc_, "objc-alloc-class"),
+         sc_->vptr->mk_foreign_func(sc_, ts_objc_alloc_class));
+    sc_->vptr->scheme_define(
+         sc_, 
+         sc_->global_env, 
+         sc_->vptr->mk_symbol(sc_, "objc-register-class"),
+         sc_->vptr->mk_foreign_func(sc_, ts_objc_register_class));
   }
   sc_->vptr->scheme_define(
        sc_, 
@@ -390,9 +490,10 @@ pointer ts_error(scheme *sc, pointer args)
 }
 
 // Private method similar to registerObject, but preserves case
-- (void)registerClass:(id)object withName:(NSString *)name 
+- (void)registerClass:(Class)klass withName:(NSString *)name 
 {
-  [registeredObjects_ setObject:object forKey:name];
+  [registeredObjects_ setObject:[TSClassWrapper wrapperWithClass:klass] 
+                      forKey:name];
 }
 
 - (void)registerObject:(id)object withName:(NSString *)name
@@ -452,9 +553,14 @@ pointer ts_error(scheme *sc, pointer args)
 {
   if (sc_->vptr->is_string(ptr))
     return [NSString stringWithUTF8String:sc_->vptr->string_value(ptr)];
-  else if (sc_->vptr->is_symbol(ptr))
-    return [registeredObjects_ objectForKey:
+  else if (sc_->vptr->is_symbol(ptr)) {
+    id obj =  [registeredObjects_ objectForKey:
       [NSString stringWithUTF8String:sc_->vptr->symname(ptr)]];
+    if ([obj isKindOfClass:[TSClassWrapper class]]) // unwrap Class
+      return [obj unwrapClass];
+    else
+      return obj;
+  }
   else if (sc_->vptr->is_integer(ptr))
     return [NSNumber numberWithInt:sc_->vptr->ivalue(ptr)];
   else if (sc_->vptr->is_real(ptr))

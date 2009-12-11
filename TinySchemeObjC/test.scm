@@ -30,19 +30,33 @@
   ; 'current-objc-interface points to instance of TinyScheme ObjC class
   ; which runs us. Let me show how to manupilate it:
   ;
-  (log "\n---\n"
-       "Listing registered objects:\n"
-      (description (-> 'current-objc-interface "registeredObjectsCopy"))
-       "\n---")
+  (define (logRegistered)
+    (log "\n---\n"
+        "Listing registered objects:\n"
+        (description (-> 'current-objc-interface "registeredObjectsCopy"))
+        "\n---"))
+  ;(logRegistered)
        
-  (log "Goodbye!")
+  ;(log "Goodbye!")
   
   ;
   ; Create method 
   ;
   (objc-add-method (objc-class "NSString") "greetingForName:" "@@:@"
                    (lambda (x) (string-append "Hello, " x)))
-
   (log "Result of our method: " 
        (-> "(test string object)" "greetingForName:" "Dima"))
+
+  ;
+  ; Create class
+  ;
+  (let ((MyClass (objc-alloc-class (objc-class "NSFileManager") "MyClass")))
+    ;(logRegistered)
+    (log "adding method")
+    (objc-add-method MyClass "sayGoodbyeTo:" "@@:@"
+                     (lambda (name) (log "Bye-bye, " name "!")))
+    ;(log "registering class")
+    (objc-register-class MyClass)
+    (let ((myObj (new "MyClass")))
+         (-> myObj "sayGoodbyeTo:" "everyone")))
 )
