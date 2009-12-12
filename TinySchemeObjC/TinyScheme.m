@@ -362,11 +362,18 @@ pointer ts_objc_register_class(scheme *sc, pointer args)
 // (error "description")
 //
 pointer ts_error(scheme *sc, pointer args) 
-{
+{  
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
-  [NSException raise:TinySchemeException format:@"Scheme error: %s (%@)", 
-    sc->vptr->string_value(sc->vptr->pair_car(args)),
-    [ts schemeTypeToObjCType:sc->value]];
+  NSMutableString *arguments = [[NSMutableString alloc] init];
+  while (args != sc->NIL) {
+    id a = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
+    if (a)
+      [arguments appendFormat:@"%@", a];
+    args = sc->vptr->pair_cdr(args);
+  }
+  [NSException raise:TinySchemeException 
+               format:@"Scheme error: (%@)", arguments];
+  return sc->NIL;
 }
 
 @implementation TinyScheme
