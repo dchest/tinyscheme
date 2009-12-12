@@ -50,7 +50,7 @@ int main (int argc, const char * argv[])
   //[[TinyScheme alloc] init];
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/init.scm"])
     NSLog(@"cannot load init.scm");
-/*
+
   @try {
     [ts loadString:@""
       " (define (logme x)  "
@@ -63,7 +63,7 @@ int main (int argc, const char * argv[])
     NSLog(@"(This is *intentional*! --> Successfuly cought code with errors. "
            "The exception was: %@ reason: ``%@'')", [e name], [e reason]);
   }
-*/
+
   // Expose some objects to scheme
   NSNumber *magicNumber = [NSNumber numberWithInt:42];
   [ts registerObject:magicNumber withName:@"magicNumber"];
@@ -73,11 +73,11 @@ int main (int argc, const char * argv[])
   
   if (![ts loadFileWithPath:@"/Users/dmitry/Projects/tinyscheme/TinySchemeObjC/test.scm"])
     NSLog(@"cannot load test.scm");
-/*
+
   [ts loadString:@""
     " (logme \"Finished\")  " // <-- remember logme from above? It's still defined
   ];
-*/
+
   [ts release];
   [pool drain];
   return 0;

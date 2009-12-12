@@ -371,9 +371,12 @@ pointer ts_error(scheme *sc, pointer args)
       [arguments appendFormat:@"%@", a];
     args = sc->vptr->pair_cdr(args);
   }
+  // Reset interpreter
+  sc->op = (int)sc->NIL;
+  sc->retcode = 0;
+  sc->loadport->_flag = 16384; // T_ATOM 16384 -- for gc
   [NSException raise:TinySchemeException 
-               format:@"Scheme error: (%@)", arguments];
-  return sc->NIL;
+             format:@"Scheme error: (%@)", arguments];
 }
 
 @implementation TinyScheme

@@ -34,7 +34,6 @@
       "Listing registered objects:\n"
       (description (-> 'current-objc-interface "registeredObjectsCopy"))
       "\n---")
-  
   ;
   ; Add method to NSObject
   ;
