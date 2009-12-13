@@ -34,6 +34,6 @@
 // Use this instead of registeredObjects to inspect registered objects in Scheme
 @property(readonly, retain) NSDictionary *registeredObjectsCopy;
 @property(retain) NSMutableDictionary *registeredMethods;
-@property(assign) BOOL shared;
+@property(assign) BOOL isShared;
 
 @end

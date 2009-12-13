@@ -272,7 +272,7 @@ id invokeMethod(id self, SEL _cmd, ...)
 pointer ts_objc_add_method(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
-  if (![ts shared])
+  if (![ts isShared])
     [ts schemeErrorWithString:@"Adding methods is only supported for "
                           "shared instances of TinyScheme"];
 
@@ -374,7 +374,7 @@ pointer ts_error(scheme *sc, pointer args)
 @implementation TinyScheme
 @synthesize registeredObjects=registeredObjects_;
 @synthesize registeredMethods=registeredMethods_;
-@synthesize shared=isShared_;
+@synthesize isShared=isShared_;
 @synthesize schemePtr=sc_;
 
 + (TinyScheme *)sharedTinyScheme
@@ -382,7 +382,7 @@ pointer ts_error(scheme *sc, pointer args)
   @synchronized(self) {
     if (sharedInstance == nil) {
       sharedInstance = [[TinyScheme alloc] init];
-      sharedInstance.shared = YES;
+      sharedInstance.isShared = YES;
     }
   }
   return sharedInstance;
