@@ -11,10 +11,12 @@
 
 @interface TinyScheme ()
 @property(retain) NSMutableDictionary *registeredObjects;
+@property(readonly) scheme *schemePtr;
 - (id)initSchemeWithSafeMode:(BOOL)safeMode;
 - (pointer)objCTypeToSchemeType:(id)obj;
 - (id)schemeTypeToObjCType:(pointer)ptr;
 - (void)registerClass:(id)object withName:(NSString *)name;
+- (void)schemeErrorWithString:(NSString *)errorString;
 @end
 
 // 
@@ -66,17 +68,17 @@ pointer ts_objc_send(scheme *sc, pointer args)
   NSString *objc_id = NULL, *objc_sel = NULL; 
 
   if (args == sc->NIL)
-    [NSException raise:TinySchemeException format:@"No arguments to objc-send"];
+    [ts schemeErrorWithString:@"objc-send: no arguments"];
   
   id object = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
   if (IsNull(object))
-      [NSException raise:TinySchemeException format:@"No object found"];
+    [ts schemeErrorWithString:@"objc-send: no object found"];
 
   NSString *selName = [ts schemeTypeToObjCType:
                         sc->vptr->pair_car(sc->vptr->pair_cdr(args))];
   
   if (IsNull(selName))
-    [NSException raise:TinySchemeException format:@"No selector in arguments"];
+    [ts schemeErrorWithString:@"objc-send: no selector in arguments"];
   
   
   SEL selector = NSSelectorFromString(selName);
@@ -85,8 +87,9 @@ pointer ts_objc_send(scheme *sc, pointer args)
     [object methodSignatureForSelector:selector];
 
   if (!sig)
-    [NSException raise:TinySchemeException 
-                 format:@"Method ``%@'' not found in ``%@''", selName, object];
+    [ts schemeErrorWithString:[NSString 
+      stringWithFormat:@"objc-send: method ``%@'' not found in ``%@''", 
+      selName, object]];
 
   NSInvocation *inv = [NSInvocation invocationWithMethodSignature:sig];
   [inv setTarget:object];
@@ -130,9 +133,8 @@ pointer ts_objc_send(scheme *sc, pointer args)
       [inv setArgument:&a atIndex:i];
     }
     else
-      [NSException raise:TinySchemeException
-                   format:@"Passing type ``%s''to objects is not supported",
-                    argType];
+      [ts schemeErrorWithString:[NSString stringWithFormat:
+          @"objc-send: passing type '%s' to objects is not supported", argType]];
   }
   [inv retainArguments];
   [inv invoke];
@@ -180,10 +182,9 @@ pointer ts_objc_class(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   if (args == sc->NIL)
-    [NSException raise:TinySchemeException format:@"No arguments to objc-class"];
+    [ts schemeErrorWithString:@"objc-class: no arguments"];
   if (!sc->vptr->is_string(sc->vptr->pair_car(args)))
-    [NSException raise:TinySchemeException format:
-      @"Argument to objc-class is not string"];
+    [ts schemeErrorWithString:@"objc-class: argument is not string"];
   // get class name
   char *cname = sc->vptr->string_value(sc->vptr->pair_car(args));
   NSString *cnameString = [NSString stringWithUTF8String:cname];
@@ -199,7 +200,7 @@ pointer ts_log(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   if (args == sc->NIL)
-    [NSException raise:TinySchemeException format:@"No arguments to log"];
+    [ts schemeErrorWithString:@"log: no arguments"];
   NSMutableString *str = [[[NSMutableString alloc] init] autorelease];
   pointer curarg = args;
   do {
@@ -253,10 +254,10 @@ id invokeMethod(id self, SEL _cmd, ...)
     scArgs = _cons(sc, curArg, scArgs, 1);
   }
   
-  NSValue *funcPtr = [[sharedInstance registeredMethods] objectForKey:selName];
+  NSValue *funcPtr = [[ts registeredMethods] objectForKey:selName];
   if (IsNull(funcPtr)) {
-    [NSException raise:TinySchemeException 
-                 format:@"Selector %@ is not registered", selName];
+    [ts schemeErrorWithString:[NSString stringWithFormat:
+      @"invokeMethod: Selector %@ is not registered", selName]];
   }
   pointer tmp = sc->dump; // save current dump, because sheme_call resets it
   scheme_call(sc, (pointer)[funcPtr pointerValue], scArgs);
@@ -272,30 +273,25 @@ pointer ts_objc_add_method(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   if (![ts shared])
-    [NSException raise:TinySchemeException 
-                 format:@"Adding methods is only supported for "
+    [ts schemeErrorWithString:@"Adding methods is only supported for "
                           "shared instances of TinyScheme"];
 
   if (args == sc->NIL)
-    [NSException raise:TinySchemeException 
-                 format:@"No arguments to objc-add-method"];
+    [ts schemeErrorWithString:@"objc-add-method: no arguments"];
   pointer nextArg = args;
   Class klass = [ts schemeTypeToObjCType:sc->vptr->pair_car(nextArg)];
   nextArg =  sc->vptr->pair_cdr(nextArg);
   if (!klass)
-    [NSException raise:TinySchemeException 
-                 format:@"No class found for objc-add-method"];
+    [ts schemeErrorWithString:@"objc-add-method: no class found"];
   NSString *methodName = [ts schemeTypeToObjCType:sc->vptr->pair_car(nextArg)];
   nextArg =  sc->vptr->pair_cdr(nextArg);
   if (IsNull(methodName))
-    [NSException raise:TinySchemeException 
-                 format:@"No method name in arguments for objc-add-method"];
+    [ts schemeErrorWithString:@"objc-add-method: no method name in arguments"];
 
   NSString *types = [ts schemeTypeToObjCType:sc->vptr->pair_car(nextArg)];
   nextArg =  sc->vptr->pair_cdr(nextArg);
   if (IsNull(types))
-    [NSException raise:TinySchemeException 
-                 format:@"No types string in arguments for objc-add-method"];
+    [ts schemeErrorWithString:@"objc-add-method: no types string in arguments"];
  
   pointer func = sc->vptr->pair_car(nextArg);
   // Assign func to some generated symbol to prevent it from being collected
@@ -321,19 +317,17 @@ pointer ts_objc_alloc_class(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   if (args == sc->NIL)
-    [NSException raise:TinySchemeException 
-                 format:@"No arguments to objc-alloc-class"];
+    [ts schemeErrorWithString:@"objc-alloc-class: no types string in arguments"];
   Class superclass = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
   if (IsNull(superclass))
-    [NSException raise:TinySchemeException 
-                 format:@"Undefined superclass for objc-alloc-class"];
+    [ts schemeErrorWithString:@"objc-alloc-class: undefined superclass"];
   NSString *className = [ts schemeTypeToObjCType:
                           sc->vptr->pair_car(sc->vptr->pair_cdr(args))];
   
   Class klass = objc_allocateClassPair(superclass, [className UTF8String], 0);
   if (klass == Nil)
-    [NSException raise:TinySchemeException 
-                 format:@"objc-alloc-class: Cannot allocate class %@", className];
+    [ts schemeErrorWithString:[NSString stringWithFormat:
+      @"objc-alloc-class: Cannot allocate class %@", className]];
   [ts registerClass:klass withName:className];
   return sc->vptr->mk_symbol(sc, [className UTF8String]);
 }
@@ -347,8 +341,7 @@ pointer ts_objc_register_class(scheme *sc, pointer args)
 {
   TinyScheme *ts = (TinyScheme *)sc->ext_data;
   if (args == sc->NIL)
-    [NSException raise:TinySchemeException 
-                 format:@"No arguments to objc-register-class"];
+    [ts schemeErrorWithString:@"objc-register-class: no arguments"];
   Class klass = [ts schemeTypeToObjCType:sc->vptr->pair_car(args)];
   
   NSString *className = nil;
@@ -371,12 +364,11 @@ pointer ts_error(scheme *sc, pointer args)
       [arguments appendFormat:@"%@", a];
     args = sc->vptr->pair_cdr(args);
   }
-  // Reset interpreter
-  sc->op = (int)sc->NIL;
-  sc->retcode = 0;
-  sc->loadport->_flag = 16384; // T_ATOM 16384 -- for gc
-  [NSException raise:TinySchemeException 
-             format:@"Scheme error: (%@)", arguments];
+  //[NSException raise:TinySchemeException 
+  //           format:@"Scheme error: (%@)", arguments];
+  
+  [ts schemeErrorWithString:[NSString stringWithFormat:@"Scheme error: (%@)",
+    arguments]];
 }
 
 @implementation TinyScheme
@@ -451,6 +443,11 @@ pointer ts_error(scheme *sc, pointer args)
        sc_->global_env, 
        sc_->vptr->mk_symbol(sc_, "log"),
        sc_->vptr->mk_foreign_func(sc_, ts_log)); 
+  sc_->vptr->scheme_define(
+       sc_, 
+       sc_->global_env, 
+       sc_->vptr->mk_symbol(sc_, "scheme-error"),
+       sc_->vptr->mk_symbol(sc_, "error"));
   sc_->vptr->scheme_define(
        sc_, 
        sc_->global_env, 
@@ -581,6 +578,15 @@ pointer ts_error(scheme *sc, pointer args)
   [registeredObjects_ removeAllObjects];
   if (!isInSaveMode_) // readd self
     [self registerObject:self withName:@"current-objc-interface"];
+}
+
+- (void)schemeErrorWithString:(NSString *)errorString
+{
+  // Reset interpreter
+  sc_->op = (int)sc_->NIL;
+  sc_->retcode = 0;
+  sc_->loadport->_flag = 16384; // T_ATOM 16384 -- for gc
+  [NSException raise:TinySchemeException format:@"%@", errorString];
 }
 
 @end

@@ -35,6 +35,5 @@
 @property(readonly, retain) NSDictionary *registeredObjectsCopy;
 @property(retain) NSMutableDictionary *registeredMethods;
 @property(assign) BOOL shared;
-@property(readonly) scheme *schemePtr;
 
 @end
